@@ -13,16 +13,19 @@ import (
 var auth smtp.Auth
 
 func queryParams(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+/*	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
-	}
+	}*/
 	switch r.Method {
 	case "GET":
 		for k, v := range r.URL.Query() {
 			fmt.Printf("%s: %s\n", k, v)
 		}
 		w.Write([]byte("Received a GET request\n"))
+/*		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+			http.ServeFile(w, r, "/home/tarash/git/book/index.html")
+		})*/
 	case "POST":
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -38,11 +41,13 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		email := emails[0]
-		log.Println("URL Param 'email' is: " + string(email))
+		log.Println("URL Param 'email' is: " + email)
 
+		//Display all request params
 		for k, v := range r.URL.Query() {
 			fmt.Printf("%s: %s\n", k, v)
 		}
+
 		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
 		templateData := struct {
 			Name string
@@ -51,7 +56,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			Name: "User",
 			URL:  "http://wisehands.me/book.pdf",
 		}
-		r := NewRequest([]string{"research010@gmail.com"}, "Hello User", "Hello")
+		r := NewRequest([]string{email}, "Hello User", "Hello")
 		if err := r.ParseTemplate("template.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
@@ -76,10 +81,13 @@ func main() {
 		ok, _ := r.SendEmail()
 		fmt.Println(ok)
 	}*/
+	fs := http.FileServer(http.Dir("/home/tarash/git/book"))
+	http.Handle("/", http.StripPrefix("/", fs))
 
-	http.HandleFunc("/", queryParams)
-	fmt.Println("Server is listening...")
-	http.ListenAndServe(":8000", nil)
+	http.HandleFunc("/api", queryParams)
+	port := ":8000"
+	fmt.Println("Server is listening... on port" + port)
+	http.ListenAndServe(port, nil)
 }
 
 
