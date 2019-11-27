@@ -60,7 +60,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			URL:  "http://wisehands.me/book.pdf",
 		}
 		r := NewRequest([]string{email}, "Hello User", "Hello")
-		if err := r.ParseTemplate("template/mailTemplate.html", templateData); err == nil {
+		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
 		}
