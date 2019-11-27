@@ -1,4 +1,4 @@
-package main
+package src
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 var auth smtp.Auth
 
 func queryParams(w http.ResponseWriter, r *http.Request) {
-/*	if r.URL.Path != "/" {
+	/*	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}*/
@@ -23,9 +23,9 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("%s: %s\n", k, v)
 		}
 		w.Write([]byte("Received a GET request\n"))
-/*		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-			http.ServeFile(w, r, "/home/tarash/git/book/index.html")
-		})*/
+		/*		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+				http.ServeFile(w, r, "/home/tarash/git/book/index.html")
+			})*/
 	case "POST":
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -57,7 +57,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			URL:  "http://wisehands.me/book.pdf",
 		}
 		r := NewRequest([]string{email}, "Hello User", "Hello")
-		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
+		if err := r.ParseTemplate("template/mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
 		}
@@ -69,18 +69,18 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	/*	auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
-	templateData := struct {
-		Name string
-		URL  string
-	}{
-		Name: "User",
-		URL:  "http://wisehands.me/book.pdf",
-	}*/
+		templateData := struct {
+			Name string
+			URL  string
+		}{
+			Name: "User",
+			URL:  "http://wisehands.me/book.pdf",
+		}*/
 	/*	r := NewRequest([]string{"research010@gmail.com"}, "Hello User", "Hello")
-	if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
-		ok, _ := r.SendEmail()
-		fmt.Println(ok)
-	}*/
+		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
+			ok, _ := r.SendEmail()
+			fmt.Println(ok)
+		}*/
 	fs := http.FileServer(http.Dir("/home/tarash/git/book"))
 	http.Handle("/", http.StripPrefix("/", fs))
 
@@ -89,7 +89,6 @@ func main() {
 	fmt.Println("Server is listening... on port" + port)
 	http.ListenAndServe(port, nil)
 }
-
 
 //Request struct
 type Request struct {
