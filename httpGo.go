@@ -88,7 +88,7 @@ func main() {
 	http.Handle("/", http.StripPrefix("/", fs))
 
 	http.HandleFunc("/api", queryParams)
-	port := ":8000"
+	port := ":5446"
 	reloadable()
 	fmt.Println("Server is listening... on port" + port)
 	http.ListenAndServe(port, nil)
