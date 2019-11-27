@@ -84,7 +84,7 @@ func main() {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
 		}*/
-	fs := http.FileServer(http.Dir("/home/tarash/git/book"))
+	fs := http.FileServer(http.Dir("../book"))
 	http.Handle("/", http.StripPrefix("/", fs))
 
 	http.HandleFunc("/api", queryParams)
