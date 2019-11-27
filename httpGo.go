@@ -1,4 +1,4 @@
-package src
+package main
 
 import (
 	"bytes"
@@ -8,6 +8,9 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var auth smtp.Auth
@@ -86,8 +89,20 @@ func main() {
 
 	http.HandleFunc("/api", queryParams)
 	port := ":8000"
+	reloadable()
 	fmt.Println("Server is listening... on port" + port)
 	http.ListenAndServe(port, nil)
+}
+
+func reloadable() {
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, syscall.SIGHUP)
+	go func() {
+		for {
+			<-s
+			fmt.Println("Reloaded")
+		}
+	}()
 }
 
 //Request struct
