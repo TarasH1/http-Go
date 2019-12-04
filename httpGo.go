@@ -54,13 +54,11 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
 
 		templateData := struct {
-			Name string
 			URL  string
 		}{
-			Name: "User",
 			URL:  "https://three-sides.com/pdf/tsoh.pdf",
 		}
-		r := NewRequest([]string{email}, "Hello User", "Hello")
+		r := NewRequest([]string{email}, "Ваша електронна копія книги", "Hello")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
