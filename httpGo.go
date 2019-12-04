@@ -51,7 +51,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("%s: %s\n", k, v)
 		}
 
-		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
+		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "mlxqtvziciulbigo", "smtp.gmail.com")
 
 		templateData := struct {
 			URL  string
