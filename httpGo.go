@@ -128,6 +128,7 @@ func (r *Request) SendEmail() (bool, error) {
 	addr := "smtp.gmail.com:587"
 
 	if err := smtp.SendMail(addr, auth, "taras.h.ua@gmail.com", r.to, msg); err != nil {
+		log.Fatal(err)
 		return false, err
 	}
 	return true, nil
