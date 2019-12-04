@@ -58,7 +58,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		}{
 			URL:  "https://three-sides.com/pdf/tsoh.pdf",
 		}
-		r := NewRequest([]string{email}, "Ваша електронна копія книги", "Hello")
+		r := NewRequest([]string{email}, "Ваша електронна копія книги", "")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
