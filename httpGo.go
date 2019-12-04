@@ -52,12 +52,13 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		}
 
 		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
+
 		templateData := struct {
 			Name string
 			URL  string
 		}{
 			Name: "User",
-			URL:  "http://wisehands.me/book.pdf",
+			URL:  "https://three-sides.com/pdf/tsoh.pdf",
 		}
 		r := NewRequest([]string{email}, "Hello User", "Hello")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
@@ -91,7 +92,8 @@ func main() {
 	port := ":5446"
 	reloadable()
 	fmt.Println("Server is listening... on port" + port)
-	http.ListenAndServe(port, nil)
+	start := http.ListenAndServe(port, nil)
+	log.Fatal(start)
 }
 
 func reloadable() {
