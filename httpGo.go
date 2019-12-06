@@ -22,6 +22,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 	}*/
 	switch r.Method {
 	case "GET":
+		//Display all request params
 		for k, v := range r.URL.Query() {
 			fmt.Printf("%s: %s\n", k, v)
 		}
@@ -50,7 +51,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		for k, v := range r.URL.Query() {
 			fmt.Printf("%s: %s\n", k, v)
 		}
-
+        //Mail authorization
 		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "mlxqtvziciulbigo", "smtp.gmail.com")
 
 		templateData := struct {
@@ -69,24 +70,44 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func receiveData(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s\n", reqBody)
+		w.Write([]byte("Received a POST request\n"))
+
+/*		emails, ok := r.URL.Query()["email"]
+
+		if !ok || len(emails[0]) < 1 {
+			log.Println("URL Param 'email' is missing")
+			return
+		}
+		email := emails[0]
+		log.Println("URL Param 'email' is: " + email)*/
+
+		//Display all request params
+		for k, v := range r.URL.Query() {
+			log.Printf("%s: %s\n", k, v)
+		}
+	default:
+		w.WriteHeader(http.StatusNotImplemented)
+		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
+	}
+}
+
 func main() {
-	/*	auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "cakeslice", "smtp.gmail.com")
-		templateData := struct {
-			Name string
-			URL  string
-		}{
-			Name: "User",
-			URL:  "http://wisehands.me/book.pdf",
-		}*/
-	/*	r := NewRequest([]string{"research010@gmail.com"}, "Hello User", "Hello")
-		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
-			ok, _ := r.SendEmail()
-			fmt.Println(ok)
-		}*/
 	fs := http.FileServer(http.Dir("../book"))
 	http.Handle("/", http.StripPrefix("/", fs))
 
 	http.HandleFunc("/api", queryParams)
+	http.HandleFunc("/api/payment/done", receiveData)
+	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Success Page")
+	})
 	port := ":5446"
 	reloadable()
 	fmt.Println("Server is listening... on port" + port)
@@ -128,7 +149,7 @@ func (r *Request) SendEmail() (bool, error) {
 	addr := "smtp.gmail.com:587"
 
 	if err := smtp.SendMail(addr, auth, "taras.h.ua@gmail.com", r.to, msg); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return false, err
 	}
 	return true, nil
