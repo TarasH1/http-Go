@@ -2,14 +2,12 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/smtp"
-	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -102,20 +100,23 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendData(w http.ResponseWriter, r *http.Request) {
-	formData := url.Values{
-		"name": {"john_doe"},
+	switch r.Method {
+	case "POST":
+		reqBody, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s\n", reqBody)
+		w.Write([]byte("Received a POST request\n"))
+
+		//Display all request params
+		for k, v := range r.URL.Query() {
+			log.Printf("%s: %s\n", k, v)
+		}
+	default:
+		w.WriteHeader(http.StatusNotImplemented)
+		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
 	}
-
-	resp, err := http.PostForm("https://wayforpay.com/post", formData)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var result map[string]interface{}
-
-	json.NewDecoder(resp.Body).Decode(&result)
-
-	log.Println(result["form"])
 }
 
 func main() {
