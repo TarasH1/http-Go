@@ -113,6 +113,46 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		for k, v := range r.URL.Query() {
 			log.Printf("%s: %s\n", k, v)
 		}
+		//Mail authorization
+		/*		emails, ok := r.URL.Query()["email"]
+
+				if !ok || len(emails[0]) < 1 {
+					log.Println("URL Param 'email' is missing")
+					return
+				}*/
+		email := "research010@gmail.com"
+		log.Println("URL Param 'email' is: " + email)
+
+		fullName := r.URL.Query()["fullName"][0]
+		phoneNumber := r.URL.Query()["phoneNumber"][0]
+		address := r.URL.Query()["address"][0]
+		newPostDepartmentNumber := r.URL.Query()["newPostDepartmentNumber"][0]
+		paymentType := r.URL.Query()["paymentType"][0]
+
+		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "mlxqtvziciulbigo", "smtp.gmail.com")
+
+		templateData := struct {
+			FullName                string
+			PhoneNumber             string
+			Address                 string
+			NewPostDepartmentNumber string
+			PaymentType             string
+		}{
+			FullName:                fullName,
+			PhoneNumber:             phoneNumber,
+			Address:                 address,
+			NewPostDepartmentNumber: newPostDepartmentNumber,
+			PaymentType:             paymentType,
+		}
+
+		r := NewRequest([]string{email}, "Нове замовлення на книгу", "")
+		if err := r.ParseTemplate("orderTemplate.html", templateData); err == nil {
+			ok, _ := r.SendEmail()
+			fmt.Println(ok)
+		} else {
+			log.Println(err)
+		}
+
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
