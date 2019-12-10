@@ -52,7 +52,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("%s: %s\n", k, v)
 		}
 		//Mail authorization
-		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "mlxqtvziciulbigo", "smtp.gmail.com")
+		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
 		templateData := struct {
 			URL string
@@ -144,7 +144,7 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		newPostDepartmentNumber := r.URL.Query()["newPostDepartmentNumber"][0]
 		paymentType := r.URL.Query()["paymentType"][0]
 
-		auth = smtp.PlainAuth("", "taras.h.ua@gmail.com", "mlxqtvziciulbigo", "smtp.gmail.com")
+		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
 		templateData := struct {
 			FullName                string
@@ -226,7 +226,7 @@ func (r *Request) SendEmail() (bool, error) {
 	msg := []byte(subject + mime + "\n" + r.body)
 	addr := "smtp.gmail.com:587"
 
-	if err := smtp.SendMail(addr, auth, "taras.h.ua@gmail.com", r.to, msg); err != nil {
+	if err := smtp.SendMail(addr, auth, "3sidesplatform@gmail.com", r.to, msg); err != nil {
 		fmt.Println(err)
 		return false, err
 	}
