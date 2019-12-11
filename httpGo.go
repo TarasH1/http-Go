@@ -203,7 +203,8 @@ func main() {
 	http.HandleFunc("/api", queryParams)
 	http.HandleFunc("/api/payment/done", receiveData)
 	http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Success Page")
+		http.ServeFile(w, r, "../book/success.html")
+		//fmt.Fprint(w, "Success Page")
 	})
 	http.HandleFunc("/order-book", sendData)
 
