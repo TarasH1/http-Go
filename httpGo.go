@@ -135,11 +135,12 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 					log.Println("URL Param 'email' is missing")
 					return
 				}*/
-		email := "research010@gmail.com"
+		email := "3sidesplatform@gmail.com"
 		log.Println("URL Param 'email' is: " + email)
 
 		fullName := r.URL.Query()["fullName"][0]
 		phoneNumber := r.URL.Query()["phoneNumber"][0]
+		userEmail := r.URL.Query()["userEmail"][0]
 		address := r.URL.Query()["address"][0]
 		newPostDepartmentNumber := r.URL.Query()["newPostDepartmentNumber"][0]
 		paymentType := r.URL.Query()["paymentType"][0]
@@ -149,12 +150,14 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		templateData := struct {
 			FullName                string
 			PhoneNumber             string
+			UserEmail               string
 			Address                 string
 			NewPostDepartmentNumber string
 			PaymentType             string
 		}{
 			FullName:                fullName,
 			PhoneNumber:             phoneNumber,
+			UserEmail:               userEmail,
 			Address:                 address,
 			NewPostDepartmentNumber: newPostDepartmentNumber,
 			PaymentType:             paymentType,
@@ -163,6 +166,24 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		r := NewRequest([]string{email}, "Нове замовлення на книгу", "")
 		if err := r.ParseTemplate("orderTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
+			fmt.Println(ok)
+		} else {
+			log.Println(err)
+		}
+
+		templateUserData := struct {
+			Address                 string
+			NewPostDepartmentNumber string
+			PaymentType             string
+		}{
+			Address:                 address,
+			NewPostDepartmentNumber: newPostDepartmentNumber,
+			PaymentType:             paymentType,
+		}
+
+		rm := NewRequest([]string{userEmail}, "Ваше замовлення книги", "")
+		if err := rm.ParseTemplate("orderUserTemplate.html", templateUserData); err == nil {
+			ok, _ := rm.SendEmail()
 			fmt.Println(ok)
 		} else {
 			log.Println(err)
