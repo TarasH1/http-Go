@@ -59,7 +59,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		}{
 			URL: "https://three-sides.com/pdf/tsoh.pdf",
 		}
-		r := NewRequest([]string{email}, "Ваша електронна копія книги", "")
+		r := NewRequest([]string{email}, "Книга 'Три сторони щастя'", "")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
@@ -181,7 +181,7 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 			PaymentType:             paymentType,
 		}
 
-		rm := NewRequest([]string{userEmail}, "Ваше замовлення книги", "")
+		rm := NewRequest([]string{userEmail}, "Книга 'Три сторони щастя'", "")
 		if err := rm.ParseTemplate("orderUserTemplate.html", templateUserData); err == nil {
 			ok, _ := rm.SendEmail()
 			fmt.Println(ok)
