@@ -57,7 +57,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		templateData := struct {
 			URL string
 		}{
-			URL: "https://three-sides.com/pdf/tsoh.pdf",
+			URL: "https://three-sides.com/pdf/Три сторони щастя (з реквізитами).pdf",
 		}
 		r := NewRequest([]string{email}, "Книга 'Три сторони щастя'", "")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
