@@ -55,6 +55,17 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		//Mail authorization
 		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
+		templateAdminData := struct {
+			UserEmail string
+		}{
+			UserEmail: email,
+		}
+		rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове завантаження книги", "")
+		if err := rm.ParseTemplate("downloadFreeAdminTemplate.html", templateAdminData); err == nil {
+			ok, _ := rm.SendEmail()
+			fmt.Println(ok)
+		}
+
 		templateData := struct {
 			URL string
 		}{
@@ -98,6 +109,8 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(emailParam)
 		transactionStatus := dat["transactionStatus"].(string)
 		fmt.Println(transactionStatus)
+		phone := dat["phone"].(string)
+		clientName := dat["clientName"].(string)
 
 		if !ok || len(emailParam) < 1 {
 			log.Println("URL Param 'email' is missing")
@@ -107,6 +120,26 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 
 		//Mail authorization
 		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+
+		templateUserToAdminData := struct {
+			Email             string
+			Phone             string
+			ClientName        string
+			TransactionStatus string
+		}{
+			Email:             emailParam,
+			Phone:             phone,
+			ClientName:        clientName,
+			TransactionStatus: transactionStatus,
+		}
+
+		rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове замовлення на книгу", "")
+		if err := rm.ParseTemplate("orderAndDownloadAdminTemplate.html", templateUserToAdminData); err == nil {
+			ok, _ := rm.SendEmail()
+			fmt.Println(ok)
+		} else {
+			log.Println(err)
+		}
 
 		templateUserData := struct {
 			URL string
@@ -130,6 +163,7 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//CORS
 func setupResponse(w *http.ResponseWriter, req *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -159,15 +193,9 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		for k, v := range r.URL.Query() {
 			log.Printf("%s: %s\n", k, v)
 		}
-		//Mail authorization
-		/*		emails, ok := r.URL.Query()["email"]
 
-				if !ok || len(emails[0]) < 1 {
-					log.Println("URL Param 'email' is missing")
-					return
-				}*/
-		email := "3sidesplatform@gmail.com"
-		log.Println("URL Param 'email' is: " + email)
+		adminEmail := "3sidesplatform@gmail.com"
+		log.Println("URL Param 'email' is: " + adminEmail)
 
 		fullName := r.URL.Query()["fullName"][0]
 		phoneNumber := r.URL.Query()["phoneNumber"][0]
@@ -176,6 +204,7 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 		newPostDepartmentNumber := r.URL.Query()["newPostDepartmentNumber"][0]
 		paymentType := r.URL.Query()["paymentType"][0]
 
+		//Mail authorization
 		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
 		templateData := struct {
@@ -194,7 +223,7 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 			PaymentType:             paymentType,
 		}
 
-		r := NewRequest([]string{email}, "Нове замовлення на книгу", "")
+		r := NewRequest([]string{adminEmail}, "Нове замовлення на книгу", "")
 		if err := r.ParseTemplate("orderTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
