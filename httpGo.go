@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -59,7 +60,7 @@ func queryParams(w http.ResponseWriter, r *http.Request) {
 		}{
 			URL: "https://three-sides.com/pdf/Три сторони щастя (з реквізитами).pdf",
 		}
-		r := NewRequest([]string{email}, "Книга 'Три сторони щастя'", "")
+		r := NewRequest([]string{email}, "Книга \"Три сторони щастя\"", "")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {
 			ok, _ := r.SendEmail()
 			fmt.Println(ok)
@@ -80,19 +81,49 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("%s\n", reqBody)
 		w.Write([]byte("Received a POST request\n"))
 
-		/*		emails, ok := r.URL.Query()["email"]
-
-				if !ok || len(emails[0]) < 1 {
-					log.Println("URL Param 'email' is missing")
-					return
-				}
-				email := emails[0]
-				log.Println("URL Param 'email' is: " + email)*/
-
 		//Display all request params
 		for k, v := range r.URL.Query() {
 			log.Printf("%s: %s\n", k, v)
 		}
+
+		//Parse JSON
+		jsonData := reqBody
+		var dat map[string]interface{}
+
+		if err := json.Unmarshal([]byte(jsonData), &dat); err != nil {
+			panic(err)
+		}
+
+		emailParam, ok := dat["email"].(string)
+		fmt.Println(emailParam)
+		transactionStatus := dat["transactionStatus"].(string)
+		fmt.Println(transactionStatus)
+
+		if !ok || len(emailParam) < 1 {
+			log.Println("URL Param 'email' is missing")
+			return
+		}
+		log.Println("URL Param 'email' is: " + emailParam)
+
+		//Mail authorization
+		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+
+		templateUserData := struct {
+			URL string
+		}{
+			URL: "https://three-sides.com/pdf/Три сторони щастя. Святосла Беш.pdf",
+		}
+
+		if transactionStatus == "Approved" {
+			rm := NewRequest([]string{emailParam}, "Книга \"Три сторони щастя\"", "")
+			if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
+				ok, _ := rm.SendEmail()
+				fmt.Println(ok)
+			} else {
+				log.Println(err)
+			}
+		}
+
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
@@ -181,7 +212,7 @@ func sendData(w http.ResponseWriter, r *http.Request) {
 			PaymentType:             paymentType,
 		}
 
-		rm := NewRequest([]string{userEmail}, "Книга 'Три сторони щастя'", "")
+		rm := NewRequest([]string{userEmail}, "Книга \"Три сторони щастя\"", "")
 		if err := rm.ParseTemplate("orderUserTemplate.html", templateUserData); err == nil {
 			ok, _ := rm.SendEmail()
 			fmt.Println(ok)
