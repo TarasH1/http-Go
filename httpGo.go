@@ -166,8 +166,9 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 		}
 		status := "accept"
 		time := makeTimestamp()
-		concatenated := fmt.Sprint(orderReference,";accept;", time)
+		concatenated := fmt.Sprint(orderReference, ";accept;", time)
 
+		//TODO: TARAS, replase secret with WAYFORPAY secret, but do not commit to GIT!!!
 		secret := "mysecret"
 		data := concatenated
 		fmt.Printf("Secret: %s Data: %s\n", secret, data)
@@ -365,11 +366,11 @@ func (r *Request) ParseTemplate(templateFileName string, data interface{}) error
 
 type WayForPaySuccessResponse struct {
 	orderReference string
-	status string
-	time int64
-	signature string
+	status         string
+	time           int64
+	signature      string
 }
 
 func makeTimestamp() int64 {
-	return time.Now().UnixNano() / (int64(time.Millisecond)/int64(time.Nanosecond))
+	return time.Now().UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
 }
