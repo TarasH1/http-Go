@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -12,6 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var auth smtp.Auth
@@ -109,6 +113,9 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(emailParam)
 		transactionStatus := dat["transactionStatus"].(string)
 		fmt.Println(transactionStatus)
+
+		orderReference := dat["orderReference"].(string)
+		fmt.Println(orderReference)
 		phone := dat["phone"].(string)
 		clientName := dat["clientName"].(string)
 
@@ -119,6 +126,7 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 		log.Println("URL Param 'email' is: " + emailParam)
 
 		//Mail authorization
+		//TODO: TARAS what da fuck password in plain text doing here???
 		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
 		templateUserToAdminData := struct {
@@ -156,6 +164,33 @@ func receiveData(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 			}
 		}
+		status := "accept"
+		time := makeTimestamp()
+		concatenated := fmt.Sprint(orderReference,";accept;", time)
+
+		secret := "mysecret"
+		data := concatenated
+		fmt.Printf("Secret: %s Data: %s\n", secret, data)
+
+		h := hmac.New(md5.New, []byte(secret))
+
+		// Write Data to it
+		h.Write([]byte(data))
+
+		// Get result and encode as hexadecimal string
+		signature := hex.EncodeToString(h.Sum(nil))
+
+		fmt.Println("Result: " + signature)
+
+		response := WayForPaySuccessResponse{orderReference, status, time, signature}
+		js, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -326,4 +361,15 @@ func (r *Request) ParseTemplate(templateFileName string, data interface{}) error
 	}
 	r.body = buf.String()
 	return nil
+}
+
+type WayForPaySuccessResponse struct {
+	orderReference string
+	status string
+	time int64
+	signature string
+}
+
+func makeTimestamp() int64 {
+	return time.Now().UnixNano() / (int64(time.Millisecond)/int64(time.Nanosecond))
 }
