@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 var auth smtp.Auth
@@ -108,18 +107,4 @@ func (r *Request) ParseTemplate(templateFileName string, data interface{}) error
 	}
 	r.body = buf.String()
 	return nil
-}
-
-type WayForPaySuccessResponse struct {
-	orderReference string
-	status         string
-	time           int64
-	signature      string
-}
-
-func makeTimestamp() int64 {
-	now := time.Now()
-	nanos := now.UnixNano()
-	secs := nanos / 1000000000
-	return secs
 }

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"time"
 )
 
 func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +73,8 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Println("wayForPayHandler JSON response from our server: " + string(js))
+		log.Printf("wayForPayHandler JSON response from our server: %+v\n", response)
+		log.Println("wayForPayHandler JSON raw response from our server: " + string(js))
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
@@ -82,6 +84,20 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
 	}
+}
+
+type WayForPaySuccessResponse struct {
+	OrderReference string `json:"orderReference"`
+	Status         string `json:"status"`
+	Time           int64  `json:"time"`
+	Signature      string `json:"signature"`
+}
+
+func makeTimestamp() int64 {
+	now := time.Now()
+	nanos := now.UnixNano()
+	secs := nanos / 1000000000
+	return secs
 }
 
 func generateSignature(orderReference string, status string, time int64) string {
