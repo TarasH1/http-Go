@@ -35,15 +35,9 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
+		//Parse request body
 		amount, ok := dat["amount"].(float64)
-		log.Printf("wayForPayHandler URL Param 'amount' is: %f\n", amount)
-
-		isPdfCopy := amount == 99
-		log.Printf("wayForPayHandler isPdfCopy %t", isPdfCopy)
-		if isPdfCopy {
-			log.Printf("wayForPayHandler PDF copy scenario, quiting...")
-			return
-		}
+		log.Printf("wayForPayHandler 'amount' is: %f\n", amount)
 
 		transactionStatus, ok := dat["transactionStatus"].(string)
 		logValueOrError("transactionStatus", transactionStatus, ok)
@@ -51,17 +45,21 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		emailParam, ok := dat["email"].(string)
 		logValueOrError("email", emailParam, ok)
 
-		sendEmails(ok, emailParam, transactionStatus)
-
 		orderReference, ok := dat["orderReference"].(string)
 		logValueOrError("orderReference", orderReference, ok)
 
-		isPaperBook := amount == 199
-		log.Printf("wayForPayHandler isPaperBook %t", isPaperBook)
-		if isPaperBook {
-			log.Printf("wayForPayHandler paper book paid by card scenario, continue...")
+		isPdfCopy := amount == 99
+		if isPdfCopy {
+			log.Printf("wayForPayHandler PDF copy scenario, not sending any email...")
 		}
 
+		isPaperBook := amount == 199
+		if isPaperBook {
+			log.Printf("wayForPayHandler paper book paid by card scenario, sending email...")
+			sendEmails(ok, emailParam, transactionStatus)
+		}
+
+		// Make response to WayForPay
 		status := "accept"
 		time := makeTimestamp()
 		signature := generateSignature(orderReference, status, time)
@@ -113,7 +111,7 @@ func sendEmails(isEmailParsedFine bool, clientEmail string, transactionStatus st
 	auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
 	if isEmailParsedFine && len(clientEmail) > 1 {
-		log.Println("wayForPayHandler URL Param 'email' is: " + clientEmail)
+		log.Println("wayForPayHandler sendEmails 'email' is: " + clientEmail)
 		templateUserData := struct {
 			URL string
 		}{
@@ -124,7 +122,7 @@ func sendEmails(isEmailParsedFine bool, clientEmail string, transactionStatus st
 			rm := NewRequest([]string{clientEmail}, "Книга \"Три сторони щастя\"", "")
 			if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
 				ok, _ := rm.SendEmail()
-				log.Printf("wayForPayHandler email for pdf copy to user sent... %t\n", ok)
+				log.Printf("wayForPayHandler sendEmails email for pdf copy to user sent... %t\n", ok)
 			} else {
 				log.Println(err)
 			}
@@ -139,7 +137,7 @@ func sendEmails(isEmailParsedFine bool, clientEmail string, transactionStatus st
 	rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове замовлення на книгу", "")
 	if err := rm.ParseTemplate("orderAndDownloadAdminTemplate.html", templateUserToAdminData); err == nil {
 		ok, _ := rm.SendEmail()
-		log.Printf("wayForPayHandler email for pdf copy to admin sent... %t\n", ok)
+		log.Printf("wayForPayHandler sendEmails email for pdf copy to admin sent... %t\n", ok)
 	} else {
 		log.Println(err)
 	}
