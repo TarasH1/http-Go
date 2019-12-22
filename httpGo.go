@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -36,8 +35,7 @@ func main() {
 	}
 
 	defer f.Close()
-	wrt := io.MultiWriter(os.Stdout, f)
-	log.SetOutput(wrt)
+	log.SetOutput(f)
 	log.Println("App Started..")
 
 	fs := http.FileServer(http.Dir("../book"))

@@ -19,8 +19,8 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("wayForPayHandler")
-		fmt.Printf("wayForPayHandler request body %s\n", reqBody)
+		log.Println("wayForPayHandler")
+		log.Printf("wayForPayHandler request body %s\n", reqBody)
 
 		//Display all request params
 		for k, v := range r.URL.Query() {
@@ -36,12 +36,12 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		emailParam, ok := dat["email"].(string)
-		fmt.Println("wayForPayHandler " + emailParam)
+		log.Println("wayForPayHandler " + emailParam)
 		transactionStatus := dat["transactionStatus"].(string)
-		fmt.Println("wayForPayHandler " + transactionStatus)
+		log.Println("wayForPayHandler " + transactionStatus)
 
 		orderReference := dat["orderReference"].(string)
-		fmt.Println("wayForPayHandler" + orderReference)
+		log.Println("wayForPayHandler" + orderReference)
 		phone := dat["phone"].(string)
 		clientName := dat["clientName"].(string)
 		amount := dat["amount"].(float64)
@@ -72,7 +72,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове замовлення на книгу", "")
 		if err := rm.ParseTemplate("orderAndDownloadAdminTemplate.html", templateUserToAdminData); err == nil {
 			ok, _ := rm.SendEmail()
-			fmt.Printf("SendFreeBookViaEmail email for pdf copy to admin sent... %t\n", ok)
+			log.Printf("SendFreeBookViaEmail email for pdf copy to admin sent... %t\n", ok)
 		} else {
 			log.Println(err)
 		}
@@ -87,7 +87,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 			rm := NewRequest([]string{emailParam}, "Книга \"Три сторони щастя\"", "")
 			if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
 				ok, _ := rm.SendEmail()
-				fmt.Printf("SendFreeBookViaEmail email for pdf copy to user sent... %t\n", ok)
+				log.Printf("SendFreeBookViaEmail email for pdf copy to user sent... %t\n", ok)
 			} else {
 				log.Println(err)
 			}
@@ -99,7 +99,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		//TODO: TARAS, replase secret with WAYFORPAY secret, but do not commit to GIT!!!
 		secret := "mysecret"
 		data := concatenated
-		fmt.Printf("SendFreeBookViaEmail Secret: %s Data: %s\n", secret, data)
+		log.Printf("SendFreeBookViaEmail Secret: %s Data: %s\n", secret, data)
 
 		h := hmac.New(md5.New, []byte(secret))
 
@@ -109,7 +109,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		// Get result and encode as hexadecimal string
 		signature := hex.EncodeToString(h.Sum(nil))
 
-		fmt.Println("SendFreeBookViaEmail Result: " + signature)
+		log.Println("SendFreeBookViaEmail Result: " + signature)
 
 		response := WayForPaySuccessResponse{orderReference, status, time, signature}
 		js, err := json.Marshal(response)

@@ -19,7 +19,7 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%s\n", reqBody)
+		log.Printf("%s\n", reqBody)
 		w.Write([]byte("Received a POST request\n"))
 
 		//Display all request params
