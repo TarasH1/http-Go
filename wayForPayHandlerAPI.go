@@ -44,8 +44,8 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("wayForPayHandler" + orderReference)
 		phone := dat["phone"].(string)
 		clientName := dat["clientName"].(string)
-		amount := dat["amount"].(string)
-		log.Println("wayForPayHandler URL Param 'amount' is: " + amount)
+		amount := dat["amount"].(float64)
+		log.Printf("wayForPayHandler URL Param 'amount' is: %f\n", amount)
 
 		if !ok || len(emailParam) < 1 {
 			log.Println("URL Param 'email' is missing")
