@@ -118,5 +118,8 @@ type WayForPaySuccessResponse struct {
 }
 
 func makeTimestamp() int64 {
-	return time.Now().UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
+	now := time.Now()
+	nanos := now.UnixNano()
+	secs := nanos / 1000000000
+	return secs
 }
