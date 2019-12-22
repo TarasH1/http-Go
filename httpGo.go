@@ -24,7 +24,13 @@ func setupResponse(w *http.ResponseWriter, req *http.Request) {
 
 func main() {
 	//Logging
-	f, err := os.OpenFile("/app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pathToLogFile := dir + "/app.log"
+	f, err := os.OpenFile(pathToLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
