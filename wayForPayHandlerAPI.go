@@ -51,13 +51,13 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 
 		isPdfCopy := amount == 99
 		if isPdfCopy {
-			log.Printf("wayForPayHandler PDF copy scenario, not sending any email...")
+			log.Printf("wayForPayHandler PDF copy scenario, sending link to book over email...")
+			sendDigitalCopyEmailLink(emailParam, transactionStatus)
 		}
 
 		isPaperBook := amount == 199
 		if isPaperBook {
-			log.Printf("wayForPayHandler paper book paid by card scenario, sending email...")
-			sendEmails(ok, emailParam, transactionStatus)
+			log.Printf("wayForPayHandler paper book paid by card scenario, do not need to send any email...")
 		}
 
 		// Make response to WayForPay
@@ -120,43 +120,26 @@ func generateSignature(orderReference string, status string, time int64) string 
 	return signature
 }
 
-func sendEmails(isEmailParsedFine bool, clientEmail string, transactionStatus string) {
-	// send emails..
-	//Mail authorization
-	//TODO: TARAS what da fuck password in plain text doing here???
+func sendDigitalCopyEmailLink(clientEmail string, transactionStatus string) {
 	auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
 
-	if isEmailParsedFine && len(clientEmail) > 1 {
-		log.Println("wayForPayHandler sendEmails 'email' is: " + clientEmail)
-		templateUserData := struct {
-			URL string
-		}{
-			URL: "https://three-sides.com/pdf/Три сторони щастя. Святосла Беш.pdf",
-		}
-
-		if transactionStatus == "Approved" {
-			rm := NewRequest([]string{clientEmail}, "Книга \"Три сторони щастя\"", "")
-			if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
-				ok, _ := rm.SendEmail()
-				log.Printf("wayForPayHandler sendEmails email for pdf copy to user sent... %t\n", ok)
-			} else {
-				log.Println(err)
-			}
-		}
-	}
-	templateUserToAdminData := struct {
-		TransactionStatus string
+	log.Println("wayForPayHandler sendEmails 'email' is: " + clientEmail)
+	templateUserData := struct {
+		URL string
 	}{
-		TransactionStatus: transactionStatus,
+		URL: "https://three-sides.com/pdf/Три сторони щастя. Святосла Беш.pdf",
 	}
 
-	rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове замовлення на книгу", "")
-	if err := rm.ParseTemplate("orderAndDownloadAdminTemplate.html", templateUserToAdminData); err == nil {
-		ok, _ := rm.SendEmail()
-		log.Printf("wayForPayHandler sendEmails email for pdf copy to admin sent... %t\n", ok)
-	} else {
-		log.Println(err)
+	if transactionStatus == "Approved" {
+		rm := NewRequest([]string{clientEmail}, "Книга \"Три сторони щастя\"", "")
+		if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
+			ok, _ := rm.SendEmail()
+			log.Printf("wayForPayHandler sendEmails email for pdf copy to user sent... %t\n", ok)
+		} else {
+			log.Println(err)
+		}
 	}
+
 }
 
 func logValueOrError(c string, v string, ok bool) {
