@@ -117,13 +117,12 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 
 		//TODO: TARAS, replase secret with WAYFORPAY secret, but do not commit to GIT!!!
 		secret := "mysecret"
-		data := concatenated
-		log.Printf("wayForPayHandler Secret: %s Data: %s\n", secret, data)
+		log.Printf("wayForPayHandler Secret: %s Data: %s\n", secret, concatenated)
 
 		h := hmac.New(md5.New, []byte(secret))
 
 		// Write Data to it
-		h.Write([]byte(data))
+		h.Write([]byte(concatenated))
 
 		// Get result and encode as hexadecimal string
 		signature := hex.EncodeToString(h.Sum(nil))
