@@ -36,15 +36,21 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		emailParam, ok := dat["email"].(string)
-		log.Println("wayForPayHandler " + emailParam)
-		transactionStatus := dat["transactionStatus"].(string)
-		log.Println("wayForPayHandler " + transactionStatus)
+		logValueOrError("email", emailParam, ok)
 
-		orderReference := dat["orderReference"].(string)
-		log.Println("wayForPayHandler" + orderReference)
-		phone := dat["phone"].(string)
-		clientName := dat["clientName"].(string)
-		amount := dat["amount"].(float64)
+		transactionStatus, ok := dat["transactionStatus"].(string)
+		logValueOrError("transactionStatus", transactionStatus, ok)
+
+		orderReference, ok := dat["orderReference"].(string)
+		logValueOrError("orderReference", orderReference, ok)
+
+		phone, ok := dat["phone"].(string)
+		logValueOrError("phone", phone, ok)
+
+		clientName, ok := dat["clientName"].(string)
+		logValueOrError("clientName", clientName, ok)
+
+		amount, ok := dat["amount"].(float64)
 		log.Printf("wayForPayHandler URL Param 'amount' is: %f\n", amount)
 
 		if !ok || len(emailParam) < 1 {
@@ -56,6 +62,19 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		//Mail authorization
 		//TODO: TARAS what da fuck password in plain text doing here???
 		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+
+		isPaperBook := amount == 199
+		log.Printf("wayForPayHandler isPaperBook %t", isPaperBook)
+		if isPaperBook {
+			log.Printf("wayForPayHandler paper book paid by card scenario, continue...")
+		}
+
+		isPdfCopy := amount == 99
+		log.Printf("wayForPayHandler isPdfCopy %t", isPaperBook)
+		if isPdfCopy {
+			log.Printf("wayForPayHandler PDF copy scenario, quiting...")
+			return
+		}
 
 		templateUserToAdminData := struct {
 			Email             string
@@ -72,7 +91,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		rm := NewRequest([]string{"3sidesplatform@gmail.com"}, "Нове замовлення на книгу", "")
 		if err := rm.ParseTemplate("orderAndDownloadAdminTemplate.html", templateUserToAdminData); err == nil {
 			ok, _ := rm.SendEmail()
-			log.Printf("SendFreeBookViaEmail email for pdf copy to admin sent... %t\n", ok)
+			log.Printf("wayForPayHandler email for pdf copy to admin sent... %t\n", ok)
 		} else {
 			log.Println(err)
 		}
@@ -87,7 +106,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 			rm := NewRequest([]string{emailParam}, "Книга \"Три сторони щастя\"", "")
 			if err := rm.ParseTemplate("orderAndDownloadUserTemplate.html", templateUserData); err == nil {
 				ok, _ := rm.SendEmail()
-				log.Printf("SendFreeBookViaEmail email for pdf copy to user sent... %t\n", ok)
+				log.Printf("wayForPayHandler email for pdf copy to user sent... %t\n", ok)
 			} else {
 				log.Println(err)
 			}
@@ -99,7 +118,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		//TODO: TARAS, replase secret with WAYFORPAY secret, but do not commit to GIT!!!
 		secret := "mysecret"
 		data := concatenated
-		log.Printf("SendFreeBookViaEmail Secret: %s Data: %s\n", secret, data)
+		log.Printf("wayForPayHandler Secret: %s Data: %s\n", secret, data)
 
 		h := hmac.New(md5.New, []byte(secret))
 
@@ -109,7 +128,7 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 		// Get result and encode as hexadecimal string
 		signature := hex.EncodeToString(h.Sum(nil))
 
-		log.Println("SendFreeBookViaEmail Result: " + signature)
+		log.Println("wayForPayHandler Result: " + signature)
 
 		response := WayForPaySuccessResponse{orderReference, status, time, signature}
 		js, err := json.Marshal(response)
@@ -124,5 +143,13 @@ func wayForPayHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
+	}
+}
+
+func logValueOrError(c string, v string, ok bool) {
+	if !ok {
+		log.Println("wayForPayHandler ERROR dat[" + c + "]")
+	} else {
+		log.Println("wayForPayHandler " + c + " is " + v)
 	}
 }
