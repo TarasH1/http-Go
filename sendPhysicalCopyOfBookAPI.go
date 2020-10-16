@@ -34,6 +34,7 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 		phoneNumber := r.URL.Query()["phoneNumber"][0]
 		userEmail := r.URL.Query()["userEmail"][0]
 		address := r.URL.Query()["address"][0]
+		comment := r.URL.Query()["comment"][0]
 		newPostDepartmentNumber := r.URL.Query()["newPostDepartmentNumber"][0]
 		paymentType := r.URL.Query()["paymentType"][0]
 
@@ -45,6 +46,7 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 			PhoneNumber             string
 			UserEmail               string
 			Address                 string
+			Comment                 string
 			NewPostDepartmentNumber string
 			PaymentType             string
 		}{
@@ -52,6 +54,7 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 			PhoneNumber:             phoneNumber,
 			UserEmail:               userEmail,
 			Address:                 address,
+			Comment:                 comment,
 			NewPostDepartmentNumber: newPostDepartmentNumber,
 			PaymentType:             paymentType,
 		}
@@ -66,10 +69,12 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 
 		templateUserData := struct {
 			Address                 string
+			Comment                 string
 			NewPostDepartmentNumber string
 			PaymentType             string
 		}{
 			Address:                 address,
+			Comment:                 comment,
 			NewPostDepartmentNumber: newPostDepartmentNumber,
 			PaymentType:             paymentType,
 		}

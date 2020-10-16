@@ -104,7 +104,7 @@ func generateSignature(orderReference string, status string, time int64) string 
 
 	concatenated := fmt.Sprint(orderReference, ";"+status+";", time)
 
-	//TODO: TARAS, replase secret with WAYFORPAY secret, but do not commit to GIT!!!
+	//TODO: replace secret with WAYFORPAY secret, but do not commit to GIT!!!
 	secret := "mysecret"
 	log.Printf("wayForPayHandler  generateSignature Secret: %s Concatenated String: %s\n", secret, concatenated)
 
