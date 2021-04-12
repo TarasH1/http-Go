@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/smtp"
 )
+
 func sendFreeBookViaEmail(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
@@ -32,7 +33,7 @@ func sendFreeBookViaEmail(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("SendFreeBookViaEmail %s: %s\n", k, v)
 		}
 		//Mail authorization
-		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "password", "smtp.gmail.com")
 
 		templateAdminData := struct {
 			UserEmail string
@@ -50,7 +51,6 @@ func sendFreeBookViaEmail(w http.ResponseWriter, r *http.Request) {
 		}{
 			URL: "https://three-sides.com/pdf/Три сторони щастя (з реквізитами).pdf",
 		}
-
 
 		r := NewRequest([]string{email}, "Книга \"Три сторони щастя\"", "")
 		if err := r.ParseTemplate("mailTemplate.html", templateData); err == nil {

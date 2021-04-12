@@ -121,7 +121,7 @@ func generateSignature(orderReference string, status string, time int64) string 
 }
 
 func sendDigitalCopyEmailLink(clientEmail string, transactionStatus string) {
-	auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+	auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "password", "smtp.gmail.com")
 
 	log.Println("wayForPayHandler sendEmails 'email' is: " + clientEmail)
 	templateUserData := struct {
