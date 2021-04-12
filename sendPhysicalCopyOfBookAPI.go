@@ -39,7 +39,7 @@ func sendPhysicalCopyOfBook(w http.ResponseWriter, r *http.Request) {
 		paymentType := r.URL.Query()["paymentType"][0]
 
 		//Mail authorization
-		auth = smtp.PlainAuth("", "3sidesplatform@gmail.com", "hjnhrjuzaxkmxzuf", "smtp.gmail.com")
+		auth = smtp.PlainAuth("", "example@domain.com", "password", "smtp.gmail.com")
 
 		templateData := struct {
 			FullName                string
